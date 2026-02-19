@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 from cluster.cluster import clusterize_addresses
 from cluster.view import view_cluster
+from cluster.stats import analyze
 
 TARGET_ADDRESS = "1JHH1pmHujcVa1aXjRrA13BJ13iCfgfBqj"
 PAYMENTS_DIR = "./cache/payments"
@@ -126,10 +127,14 @@ def main():
         download_payments_data(api_key, TARGET_ADDRESS)
 
     payments_to_target = load_payments_data()
+
     transaction_hashes = set(
         [payment["transaction_hash"] for payment in payments_to_target]
     )
     print(f"Payments to {TARGET_ADDRESS}:{len(transaction_hashes)}")
+
+    deposit_values = [payment["value"] for payment in payments_to_target]
+    analyze(deposit_values)
 
     if should_download_data(TRANSACTIONS_DIR):
         print("donwloading transactions data...")
