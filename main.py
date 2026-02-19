@@ -3,6 +3,7 @@ import requests
 import json
 from dotenv import load_dotenv
 from cluster.cluster import clusterize_addresses
+from cluster.view import view_cluster
 
 TARGET_ADDRESS = "1JHH1pmHujcVa1aXjRrA13BJ13iCfgfBqj"
 PAYMENTS_DIR = "./cache/payments"
@@ -142,6 +143,8 @@ def main():
         print(f"[{i}] cluster: {len(cluster)} addresses")
         for address in cluster:
             print(f"\t{address}")
+
+    view_cluster(clusters, TARGET_ADDRESS)
 
 
 if __name__ == "__main__":
