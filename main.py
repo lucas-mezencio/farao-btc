@@ -2,6 +2,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+from cluster.cluster import clusterize_addresses
 
 TARGET_ADDRESS = "1JHH1pmHujcVa1aXjRrA13BJ13iCfgfBqj"
 PAYMENTS_DIR = "./cache/payments"
@@ -23,6 +24,30 @@ def load_payments_data() -> list:
 
     except Exception as e:
         print(f"Error loading payments data: {e}")
+        return []
+
+
+def load_transactions_data() -> list:
+    transactions_data = []
+    try:
+        transactions = os.listdir(TRANSACTIONS_DIR)
+        for transaction_file in transactions:
+            with open(
+                os.path.join(TRANSACTIONS_DIR, transaction_file), "r", encoding="utf-8"
+            ) as f:
+                content = json.load(f)
+                data = content.get("data", {})
+                if data:
+                    tx_hash = list(data.keys())[0]
+                    tx_data = data[tx_hash]
+                    transactions_data.append(tx_data)
+                else:
+                    print(f"failed to get tx data from {transaction_file}")
+
+        return transactions_data
+
+    except Exception as e:
+        print(f"Error loading transactions data: {e}")
         return []
 
 
@@ -108,6 +133,15 @@ def main():
     if should_download_data(TRANSACTIONS_DIR):
         print("donwloading transactions data...")
         download_transactions(api_key, transaction_hashes)
+
+    txs = load_transactions_data()
+    clusters = clusterize_addresses(txs)
+    print(f"clusters: {len(clusters)}")
+
+    for i, cluster in enumerate(clusters):
+        print(f"[{i}] cluster: {len(cluster)} addresses")
+        for address in cluster:
+            print(f"\t{address}")
 
 
 if __name__ == "__main__":
